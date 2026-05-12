@@ -126,7 +126,7 @@ fun ProfileScreen() {
                     Column {
                         ListItem(
                             headlineContent = { Text("版本") },
-                            supportingContent = { Text("1.1") },
+                            supportingContent = { Text("1.3") },
                             leadingContent = { Icon(Icons.Default.Info, contentDescription = null) },
                         )
                         HorizontalDivider()

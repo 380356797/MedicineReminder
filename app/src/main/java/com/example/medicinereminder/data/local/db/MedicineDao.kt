@@ -92,6 +92,9 @@ interface MedicineLogDao {
     @Query("UPDATE medicine_logs SET status = :status, takenTime = :takenTime WHERE id = :id")
     suspend fun updateStatus(id: Long, status: LogStatus, takenTime: Long?)
 
+    @Query("SELECT id FROM medicine_logs WHERE medicineId = :medicineId AND ABS(scheduledTime - :scheduledTime) < 60000 LIMIT 1")
+    suspend fun findLogId(medicineId: Long, scheduledTime: Long): Long?
+
     @Query("DELETE FROM medicine_logs WHERE scheduledTime < :before")
     suspend fun cleanup(before: Long)
 }

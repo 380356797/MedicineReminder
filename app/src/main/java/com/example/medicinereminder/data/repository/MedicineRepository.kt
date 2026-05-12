@@ -25,4 +25,5 @@ class MedicineRepository(
     fun getTodayLogs(startOfDay: Long, endOfDay: Long): Flow<List<MedicineLogWithMedicine>> = logDao.getTodayLogsWithMedicine(startOfDay, endOfDay)
     suspend fun insertLog(log: MedicineLog): Long = logDao.insert(log)
     suspend fun updateLogStatus(id: Long, status: LogStatus, takenTime: Long?) = logDao.updateStatus(id, status, takenTime)
+    suspend fun findLogId(medicineId: Long, scheduledTime: Long): Long? = logDao.findLogId(medicineId, scheduledTime)
 }

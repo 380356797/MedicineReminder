@@ -72,3 +72,17 @@ ViewModels expose `StateFlow` via `.stateIn(viewModelScope, SharingStarted.While
 - **ViewModel creation:** Use `appViewModel()`, do NOT use `viewModel()` directly
 - **When exhaustiveness:** `RepeatType` enum has 4 values (DAILY, EVERY_OTHER_DAY, WEEKLY, CUSTOM) — all must be handled in `when` expressions
 - **Locale:** UI text is in Chinese (简体中文)
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues in `github.com/380356797/MedicineReminder`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/domain.md`.

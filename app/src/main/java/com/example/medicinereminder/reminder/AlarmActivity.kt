@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.example.medicinereminder.data.local.db.AppDatabase
 import com.example.medicinereminder.data.local.db.LogStatus
 import com.example.medicinereminder.data.repository.MedicineRepository
+import com.example.medicinereminder.theme.MedicineReminderTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -89,7 +90,7 @@ class AlarmActivity : ComponentActivity() {
         startAlarm()
 
         setContent {
-            MaterialTheme {
+            MedicineReminderTheme {
                 AlarmScreen(
                     medicineName = medicineName,
                     doseAmount = doseAmount,
