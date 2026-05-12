@@ -10,6 +10,7 @@ class MedicineRepository(
 ) {
     fun getAllMedicines(): Flow<List<Medicine>> = medicineDao.getAll()
     fun getAllEnabledMedicines(): Flow<List<Medicine>> = medicineDao.getAllEnabled()
+    fun getUserMedicines(): Flow<List<Medicine>> = medicineDao.getUserMedicines()
     suspend fun getMedicineById(id: Long): Medicine? = medicineDao.getById(id)
     suspend fun getMedicineByName(name: String): Medicine? = medicineDao.getByName(name)
     suspend fun insertMedicine(medicine: Medicine): Long = medicineDao.insert(medicine)

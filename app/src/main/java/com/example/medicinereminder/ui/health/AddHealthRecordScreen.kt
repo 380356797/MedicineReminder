@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -32,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.medicinereminder.appViewModel
 import com.example.medicinereminder.data.local.db.HealthRecord
+import com.example.medicinereminder.ui.medicine.PhotoCaptureSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +46,7 @@ fun AddHealthRecordScreen(
     val indicator by viewModel.indicator.collectAsStateWithLifecycle()
     var value by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
+    var photoPath by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(indicatorId) {
         viewModel.load(indicatorId)
@@ -69,10 +73,10 @@ fun AddHealthRecordScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 20.dp, vertical = 16.dp),
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .verticalScroll(rememberScrollState()),
         ) {
             indicator?.let { ind ->
-                // Show unit prominently
                 if (ind.unit.isNotEmpty()) {
                     Text(
                         ind.name,
@@ -136,6 +140,14 @@ fun AddHealthRecordScreen(
                     textStyle = MaterialTheme.typography.bodyLarge,
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                PhotoCaptureSection(
+                    currentPhotoPath = photoPath,
+                    onPhotoCaptured = { photoPath = it },
+                    onPhotoDeleted = { photoPath = null },
+                )
+
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
@@ -145,6 +157,7 @@ fun AddHealthRecordScreen(
                                 indicatorId = indicatorId,
                                 value = value.trim(),
                                 notes = notes.trim(),
+                                photoPath = photoPath,
                             )
                         )
                         onBack()

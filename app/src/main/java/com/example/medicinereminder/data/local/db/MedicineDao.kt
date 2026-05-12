@@ -11,6 +11,9 @@ interface MedicineDao {
     @Query("SELECT * FROM medicines ORDER BY isPreset DESC, name ASC")
     fun getAll(): Flow<List<Medicine>>
 
+    @Query("SELECT * FROM medicines WHERE isPreset = 0 ORDER BY createdAt DESC")
+    fun getUserMedicines(): Flow<List<Medicine>>
+
     @Query("SELECT * FROM medicines WHERE id = :id")
     suspend fun getById(id: Long): Medicine?
 

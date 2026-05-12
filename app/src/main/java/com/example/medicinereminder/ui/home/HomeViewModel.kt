@@ -27,7 +27,7 @@ class HomeViewModel(
     private val reminderScheduler: ReminderScheduler,
 ) : ViewModel() {
 
-    val medicines: StateFlow<List<Medicine>> = repository.getAllEnabledMedicines()
+    val medicines: StateFlow<List<Medicine>> = repository.getUserMedicines()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _todayItems = MutableStateFlow<List<TodayScheduleItem>>(emptyList())

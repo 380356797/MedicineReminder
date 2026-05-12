@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
         HealthIndicator::class,
         HealthRecord::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -39,6 +39,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "medicine_reminder.db"
                 )
                     .addCallback(PrepopulateCallback(context))
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { INSTANCE = it }
             }

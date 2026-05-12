@@ -23,5 +23,6 @@ data class HealthRecord(
     val indicatorId: Long,
     val value: String,
     val notes: String = "",
+    val photoPath: String? = null,
     val recordedAt: Long = System.currentTimeMillis(),
 )

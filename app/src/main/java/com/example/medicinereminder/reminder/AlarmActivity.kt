@@ -28,16 +28,20 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.medicinereminder.data.local.db.AppDatabase
+import com.example.medicinereminder.data.local.db.LogStatus
+import com.example.medicinereminder.data.repository.MedicineRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,11 +57,11 @@ class AlarmActivity : ComponentActivity() {
     private var alarmId: Int = 0
     private var doseAmount: Int = 1
     private var doseUnit: String = "片"
+    private var logId: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Show over lock screen and turn screen on
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
@@ -74,15 +78,14 @@ class AlarmActivity : ComponentActivity() {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // Read intent extras
         medicineName = intent.getStringExtra("medicine_name") ?: "药物"
         scheduleId = intent.getLongExtra("schedule_id", 0L)
         medicineId = intent.getLongExtra("medicine_id", 0L)
         alarmId = intent.getIntExtra("alarm_id", 0)
         doseAmount = intent.getIntExtra("dose_amount", 1)
         doseUnit = intent.getStringExtra("dose_unit") ?: "片"
+        logId = intent.getLongExtra("log_id", 0L)
 
-        // Start alarm sound and vibration
         startAlarm()
 
         setContent {
@@ -107,7 +110,6 @@ class AlarmActivity : ComponentActivity() {
     }
 
     private fun startAlarm() {
-        // Play alarm sound
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         if (alarmUri != null) {
@@ -120,10 +122,8 @@ class AlarmActivity : ComponentActivity() {
             ringtone?.play()
         }
 
-        // Vibrate
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager =
-                getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             vibratorManager.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
@@ -145,13 +145,18 @@ class AlarmActivity : ComponentActivity() {
     }
 
     private fun logAsTaken() {
-        // TODO: Insert a record into the database marking this dose as taken.
-        //  Example: MedicineReminderRepository(context).markAsTaken(scheduleId, medicineId)
+        val db = AppDatabase.getInstance(this)
+        val repo = MedicineRepository(db.medicineDao(), db.medicineScheduleDao(), db.medicineLogDao())
+        CoroutineScope(Dispatchers.IO).launch {
+            if (logId > 0) {
+                repo.updateLogStatus(logId, LogStatus.TAKEN, System.currentTimeMillis())
+            }
+        }
     }
 
     private fun scheduleSnooze() {
         val scheduler = ReminderScheduler(this)
-        scheduler.snooze(scheduleId, medicineId, medicineName, 15)
+        scheduler.snooze(scheduleId, medicineId, medicineName, doseAmount, doseUnit, 15)
     }
 
     override fun onDestroy() {
@@ -168,7 +173,6 @@ private fun AlarmScreen(
     onTaken: () -> Unit,
     onSnooze: () -> Unit,
 ) {
-    val context = LocalContext.current
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     val currentTime = timeFormat.format(Date())
 
@@ -180,7 +184,6 @@ private fun AlarmScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        // Clock icon / header
         Text(
             text = "吃药时间到了",
             fontSize = 22.sp,
@@ -190,7 +193,6 @@ private fun AlarmScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Medicine name - large and prominent
         Text(
             text = medicineName,
             fontSize = 42.sp,
@@ -202,7 +204,6 @@ private fun AlarmScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Current time
         Text(
             text = currentTime,
             fontSize = 64.sp,
@@ -213,7 +214,6 @@ private fun AlarmScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Dose info
         Text(
             text = "每次 $doseAmount $doseUnit",
             fontSize = 28.sp,
@@ -224,12 +224,10 @@ private fun AlarmScreen(
 
         Spacer(modifier = Modifier.height(64.dp))
 
-        // Action buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Snooze button
             Button(
                 onClick = onSnooze,
                 modifier = Modifier
@@ -248,7 +246,6 @@ private fun AlarmScreen(
                 )
             }
 
-            // Taken button
             Button(
                 onClick = onTaken,
                 modifier = Modifier
